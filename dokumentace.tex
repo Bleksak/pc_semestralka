@@ -1,0 +1,182 @@
+% ==========================================================================
+% ======================== Dokumentace k PC 1.0 ;-) ========================
+% ==========================================================================
+
+% Ověřeno, prošlo bez jediné připomínky - při dodržení následujících pokynů:
+% - SPRÁVNĚ vyplnit titulní stranu (!!!)
+% - Nadpisy používat v pořadí (zanoření):
+% 		- chapter (celá kapitola)
+%		- section
+% 		- subsection, subsubsection ... 
+% - Pro pomlčky V TEXTU používat -- (doslova 2 mínusy). Neplatí pro rozsahy
+%	(0-9), spojovníky typu xxx-li apod.
+% - Uvozovky - používat české \uv{hezké uvozovky}.
+% - Zvýrazňovat \textit{kurzívou}.
+% - Názvy modulů, funkcí psát \texttt{neproporcionálním fontem}.
+% - URL psát do \url{}
+% - In-line matematické výrazy přímo do řádky $uzavřené do dolarů$, složitější
+%	na samostatnou řádku $$do dvojitých$$.
+% - Pokud např. v zadání zmiňujete LATEX a TEX, použít \latex resp. \tex.
+
+% - Pozor na předložky a spojky - nesmí se vyskytovat na konci řádku => použít
+%	nedělitelnou mezeru (~).
+% - Nové odstavce dvojitým odřádkováním.
+
+% OBRÁZKY	- Vektorově (!!!) - Illustrator, free Inkscape.
+% 			- Rastrově vkládat jen screeny obrazovky.
+%			- V textu pak odkazovat pomocí \ref{img1}.
+%			- Pro úpravu velikosti změnit scale.
+% 	\begin{figure}[h]
+%		\centering
+%		\includegraphics[scale=1.0]{soubor.pdf/png}
+%		\caption{Popisek}
+%		\label{img1}
+%	\end{figure}
+
+% PŘELOŽENÍ
+% - Nainstalovat doporučený MiKTeX.
+% - "pdflatex <nazev-souboru>.tex"
+% - Pro správné vygenerování odkazů, obsahu nutné vždy spustit 2x (!!!)
+% - Pro zjednodušení stačí spouštět přibalený bat, který to udělá sám ;)
+
+% ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+% ^^^^^^^^^^^^^^^^^ !!!!!!!!!SMAZAT PŘI ODEVZDÁNÍ!!!!!!!!! ^^^^^^^^^^^^^^^^^
+% ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+\documentclass[
+	12pt,
+	a4paper,
+	pdftex,
+	czech,
+	titlepage
+]{report}
+
+\usepackage[czech]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{textcomp}
+\usepackage[T1]{fontenc}
+\usepackage{amsfonts}
+\usepackage{titlesec}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{calc, trees, positioning, arrows, chains, shapes.geometric,
+	decorations.pathreplacing, decorations.pathmorphing, shapes, matrix,
+	shapes.symbols, circuits, automata, positioning, intersections}
+
+\titleformat{\chapter}
+{\normalfont\LARGE\bfseries}{\thechapter}{1em}{}
+\titlespacing*{\chapter}{0pt}{0ex plus 1ex minus .2ex}{2.0ex plus .2ex}
+
+\begin{document}
+
+\begin{titlepage}
+	\vspace*{-2cm}
+	{\centering\includegraphics[scale=1.0]{logo.pdf}\par}
+	\centering
+	\vspace*{2cm}
+	{\Large Semestrální práce z KIV/PC\par}
+	\vspace{1.5cm}
+	{\Huge\bfseries Přebarvování souvislých oblastí ve snímku\par}
+	\vspace{2cm}
+
+	{\Large Jiří Velek\par}
+	{\Large A20B0269P\par}
+	{\Large jvelek@students.zcu.cz\par}
+
+	\vfill
+
+	{\Large 26.\,10.\,2021}
+\end{titlepage}
+
+\tableofcontents
+\thispagestyle{empty}
+\clearpage
+
+\chapter{Zadání}
+\setcounter{page}{1}
+Naprogramujte v ANSI C přenositelnou konzolovou aplikaci, která provede v
+binárním digitálním obrázku (tj.\ obsahuje jen černé a bílé body) obarvení
+souvislých oblastí pomocí níže uvedeného algoritmu Connected-Component Labeling
+z oboru počítačového vidění. Vaším úkolem je tedy implementace tohoto algoritmu
+a funkcí rozhraní (tj.\ načítání a ukládání obrázku, apod.). Program se bude
+spoučtět příkazem
+
+\begin{center}
+	\tikzstyle{block} = [rectangle, draw, fill=white!20, rounded corners]
+	\tikzstyle{line} = [draw, thick, color=black!50, -latex']
+	\begin{tikzpicture}[node distance = 0.5cm, auto]
+		\node [block] (1) {
+		ccl.exe $\langle$ input-file[.pgm] $\rangle$ $\langle$
+		output-file
+		$\rangle $
+		};
+	\end{tikzpicture}
+\end{center}
+
+Symbol $\langle$ input-file $\rangle$ zastupuje jméno vstupního souboru s
+binárním obrázkem ve formátu Portable Gray Map, přípona souboru nemusí být
+uvedena; pokud uvedena není, předpokládejte, že má soubor příponu .pgm. Symbol
+$\langle$ output-file $\rangle$ zastupuje jméno výstupního souboru s obarveným
+obrázkem, který vytvoří vaše aplikace. Program tedy může být během testování
+spuštěn například takto:
+
+\begin{center}
+	\tikzstyle{block} = [rectangle, draw, fill=white!20, rounded corners]
+	\tikzstyle{line} = [draw, thick, color=black!50, -latex']
+	\begin{tikzpicture}[node distance = 0.5cm, auto]
+		\node [block] (1) {
+			\ldots\textbackslash>ccl.exe
+			e:\textbackslash{}images\textbackslash{}img-inp-01.pgm
+
+			e:\textbackslash{}images\textbackslash{}img-res-01.pgm};
+	\end{tikzpicture}
+\end{center}
+
+Úkolem vašeho programu tedy je vytvořit výsledný soubor s obarveným obrázkem v
+uvedeném umístění a s uvedeným jménem. Vstupní i výstupní obrázek bude uložen v
+souboru ve formátu PGM, který je popsán níže. Obarvení proveďte podle níže
+uvedeného algoritmu.
+\\
+
+Testujte, zda je vstupní obraz skutečně černobílý. Musí obsahovat pouze pixely
+s hodnotou 0x00 a 0xFF. Pokud tomu tak není, vypište krátké chybové hlášení
+(anglicky) a oznamte chybu operačnímu prostředí pomocí nenulového návratového
+kódu.
+\\
+
+Hotovou práci odevzdejte v jediném archivu typu ZIP prostřednictvím
+automatického odevzdávacího a validačního systému. Postupujte podle instrukcí
+uvedených na webu předmětu. Archiv nechť obsahuje všechny zdrojové soubory
+potřebné k přeložení programu, makefile pro Windows i Linux(pro překlad v
+Linuxu připravte soubor pojmenovaný makefile a pro Windows makefile.win) a
+dokumentaci ve formátu PDF vytvořenou v typografickém systému \TeX{}, resp.
+\LaTeX{}. Bude-li některá z částí chybět, kontrolní skript Vaši práci odmítne.
+
+\chapter{Analýza úlohy}
+Úloha je rozdělena do tří částí: validace a načítání PGM souboru, přebarvení
+souvislých komponent, a nakonec zápis do nového PGM souboru.
+\section{Načítaní PGM souboru}
+PGM soubor je definován následovně:
+\begin{enumerate}
+	\item řetězec ``P5``
+	\item bílý znak
+	\item šířka
+	\item bílý znak
+	\item výška
+	\item bílý znak
+	\item maximální hodnota šedi, které mohou jednotlivé pixely nabývat
+	\item bílý znak
+	\item jednotlivé pixely ($šířka * výška$ pixelů)
+\end{enumerate}
+
+V našem případě je třeba kontrolovat, zda každý pixel obsahuje hodnotu 0 nebo
+255 a pokud ne, program skončí chybovou hláškou.
+
+\chapter{Implementace}
+
+\chapter{Uživatelská příručka}
+
+\chapter{Závěr}
+
+\end{document}
