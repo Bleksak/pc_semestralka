@@ -2,6 +2,18 @@
 \contentsline {chapter}{\numberline {1}Zadání}{1}{}%
 \contentsline {chapter}{\numberline {2}Analýza úlohy}{2}{}%
 \contentsline {section}{\numberline {2.1}Načítaní PGM souboru}{2}{}%
-\contentsline {chapter}{\numberline {3}Implementace}{3}{}%
-\contentsline {chapter}{\numberline {4}Uživatelská příručka}{4}{}%
-\contentsline {chapter}{\numberline {5}Závěr}{5}{}%
+\contentsline {section}{\numberline {2.2}Přebarvování souvislých komponent}{2}{}%
+\contentsline {subsection}{\numberline {2.2.1}Řešení pomocí algoritmu Depth-first search}{3}{}%
+\contentsline {subsubsection}{`find\_components'}{3}{}%
+\contentsline {subsubsection}{`dfs'}{3}{}%
+\contentsline {subsubsection}{Komplexita algoritmu}{3}{}%
+\contentsline {subsection}{\numberline {2.2.2}Řešení pomocí algoritmu Connected component labeling}{3}{}%
+\contentsline {chapter}{\numberline {3}Implementace}{4}{}%
+\contentsline {section}{\numberline {3.1}Union-find}{4}{}%
+\contentsline {subsection}{\numberline {3.1.1}Operace find}{4}{}%
+\contentsline {subsubsection}{Implementace v jazyce C}{4}{}%
+\contentsline {subsection}{\numberline {3.1.2}Operace union}{4}{}%
+\contentsline {subsubsection}{Implementace v jazyce C}{5}{}%
+\contentsline {section}{\numberline {3.2}CCL}{5}{}%
+\contentsline {chapter}{\numberline {4}Uživatelská příručka}{6}{}%
+\contentsline {chapter}{\numberline {5}Závěr}{7}{}%

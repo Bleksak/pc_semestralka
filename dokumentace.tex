@@ -51,6 +51,35 @@
 	titlepage
 ]{report}
 
+% Vkládání formátovaného zdrojového kódu
+\usepackage{listings}
+\renewcommand{\lstlistingname}{Zdrojový kód}
+% Balík listings není standardní a není propojen s babelem.
+\renewcommand\lstlistlistingname{Seznam zdrojových kódů}
+\lstset{
+	backgroundcolor=\color{gray!10},
+	basicstyle=\ttfamily,
+	columns=fullflexible,
+	breakatwhitespace=false,
+	breaklines=true,
+	captionpos=b,
+	commentstyle=\color{green},
+	extendedchars=true,
+	frame=single,
+	keepspaces=true,
+	keywordstyle=\color{blue},
+	language=c++,
+	numbers=left,
+	numbersep=5pt,
+	numberstyle=\tiny\color{blue},
+	rulecolor=\color{gray},
+	showspaces=false,
+	showtabs=false,
+	stringstyle=\color{mymauve},
+	tabsize=3,
+	title=\lstname{}
+}
+
 \usepackage[czech]{babel}
 \usepackage[utf8]{inputenc}
 \usepackage{lmodern}
@@ -133,14 +162,14 @@ spuštěn například takto:
 	\end{tikzpicture}
 \end{center}
 
-Úkolem vašeho programu tedy je vytvořit výsledný soubor s obarveným obrázkem v
-uvedeném umístění a s uvedeným jménem. Vstupní i výstupní obrázek bude uložen v
-souboru ve formátu PGM, který je popsán níže. Obarvení proveďte podle níže
+Úkolem vašeho programu tedy je vytvořit výsledný soubor s obarveným obrázkem
+v~uvedeném umístění a s uvedeným jménem. Vstupní i výstupní obrázek bude uložen
+v~souboru ve formátu PGM, který je popsán níže. Obarvení proveďte podle níže
 uvedeného algoritmu.
 \\
 
 Testujte, zda je vstupní obraz skutečně černobílý. Musí obsahovat pouze pixely
-s hodnotou 0x00 a 0xFF. Pokud tomu tak není, vypište krátké chybové hlášení
+s hodnotou 0x00 a 0xFF\@. Pokud tomu tak není, vypište krátké chybové hlášení
 (anglicky) a oznamte chybu operačnímu prostředí pomocí nenulového návratového
 kódu.
 \\
@@ -171,9 +200,121 @@ PGM soubor je definován následovně:
 \end{enumerate}
 
 V našem případě je třeba kontrolovat, zda každý pixel obsahuje hodnotu 0 nebo
-255 a pokud ne, program skončí chybovou hláškou.
+255 a pokud ne, program skončí chybovou hláškou. Zároveň je třeba kontrolovat,
+zda soubor opravdu obsahuje správný počet pixelů a všechny kontrolní parametry
+(šířku, výšku, maximální hodnotu šedi). Po dokončení načítání si program uchová
+pouze výšku obrázku, šířku obrázku a sekvenci jednotlivých pixelů.
+
+\section{Přebarvování souvislých komponent}
+Problém přebarvování souvislých komponent lze řešit dvěma různými způsoby:
+\begin{enumerate}
+	\item Pomocí algoritmu DFS
+	\item Pomocí algoritmu CCL
+\end{enumerate}
+
+\subsection{Řešení pomocí algoritmu Depth-first search}
+Algoritmus depth-first search je algoritmus na prohledávání grafu do hloubky.
+Samotné řešení našeho problému je rozděleno na dvě funkce: `find\_components' a
+`dfs'.
+
+\subsubsection{`find\_components'}
+Funkce vytvoří pole `labels' velikosti $šířka * výška$, které značí, zda už se
+algoritmus na dané pozici vyskytl, a zároveň si uchová hodnotu oblasti, ve
+které se daný pixel nachází.
+Potom pro každý pixel, který ještě není v poli, zavolá dfs, a inkrementuje
+label, který přiřazuje pixelům.
+
+\subsubsection{`dfs'}
+Pokud předaný pixel neobsahuje label, neobsahuje barvu pozadí (černou), a
+zároveň jeho souřadnice nejou mimo
+hranice velikosti obrázku, pak
+funkce nastaví label předanému pixelu a pro všechny jeho sousedy rekurzivně
+zavolá sama sebe.
+
+\subsubsection{Komplexita algoritmu}
+První cyklus projde přes všechny pixely - $\mathcal{O}(šířka * výška)$,
+algoritmus dfs má
+komplexitu $\mathcal{O}(V+E)$, kde V je počet pixelů, a E počet hran (každý
+pixel má
+8 sousedů), tedy $E = 4*šířka*výška-3*šířka-3*výška + 2$, celková komplexita
+algoritmu je tedy:
+$\mathcal{O}(šířka * výška)$.
+
+\subsection{Řešení pomocí algoritmu Connected component labeling}
+Algoritmus Connected component labeling je dvouprůchodový algoritmus. Při
+prvním průchodu spojí všechny sousedící vrcholy se stejnou barvou do jedné
+množiny a při druhém průchodu tyto množiny očísluje a přidělí barvu jednotlivým
+pixelům. Algoritmus má komplexitu
+$\mathcal{O}(šířka * výška)$, ale násobící konstanta je nižší, než u
+DFS, tedy algoritmus CCL bude o trochu rychlejší.
 
 \chapter{Implementace}
+U konkrétní implementace bylo zvoleno řešení algoritmem Connected component
+labeling. K realizaci tohoto algoritmu je potřeba vyrobit datovou strukturu
+reprezentující množinu. Množina je v programu realizována jako algoritmus
+union-find reprezentovaný polem.
+
+\section{Union-find}
+Union-find je algoritmus pro reprezentaci množin a k jejich
+jednoduchému slučování. Ke sloučení dvou množin $A,B$ stačí pouze najít
+``rodičovský vrchol množiny $A$'' a přepsat jeho rodiče na libovolný prvek z
+množiny $B$.
+\\
+\\
+Union-find je v programu implementován v souborech \emph{set.h}, \emph{set.c}.
+
+\subsection{Operace find}
+Operace find najde ``rodičovský vrchol množiny'', jako parametr přebírá
+jakýkoliv prvek množiny. V cyklu prochází pole tak, že: $i = a_i$, dokud platí:
+$a_i \neq a_{a_i}$, potom vrátí index $i$.
+
+\subsubsection{Implementace v jazyce C}
+\begin{lstlisting}[language=C++, caption={Operace find}, label={source:tbbinit}]
+uint8_t find(uint8_t set[], uint8_t element) {
+	while(set[element] != element) {
+		element = set[element];
+	}
+
+	return element;
+}
+\end{lstlisting}
+
+\subsection{Operace union}
+Operace union přebírá dva prvky z různých množin a spojí je do jedné. Nejprve
+zavolá find na obou prvcích a potom jednomu z nalezených rodičů nastaví rodiče
+na druhého z nalezených.
+
+\subsubsection{Implementace v jazyce C}
+\begin{lstlisting}[language=C++, caption={Operace union}, label={source:tbbinit}]
+/* funkce je pojmenovana onion, nebot v C je union rezervovane klicove slovo */
+void onion(uint8_t set[], uint8_t elementA, uint8_t elementB) {
+	uint8_t a = find(set, elementA);
+	uint8_t b = find(set, elementB);
+
+	set[a] = b;
+}
+\end{lstlisting}
+
+\section{CCL}
+
+\subsubsection{Implementace v jazyce C}
+\begin{lstlisting}[language=C++, caption={Operace union}, label={source:tbbinit}]
+void ccl(uint8_t* data, int width, int height) {
+	int y, x;
+	uint8_t label = 0;
+	for(y = 0; y < height; ++y) {
+		for(x = 0; x < width; ++x) {
+
+			if(data[y*width + x] == BACKGROUND) {
+				continue;
+			}
+
+			
+
+		}
+	}
+}
+
 
 \chapter{Uživatelská příručka}
 
